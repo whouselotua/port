@@ -1,4 +1,3 @@
-﻿  main.cpp
-C:\Users\dalm3\source\repos\server\server\main.cpp(122,17): warning C4101: 'tmp' :참조되지 않은 지역 변수입니다.
-C:\Users\dalm3\source\repos\server\server\main.cpp(150,11): warning C4101: 'retval' :참조되지 않은 지역 변수입니다.
+﻿  servermain.cpp
+C:\Users\dalm3\source\repos\server\server\servermain.cpp(166,9): warning C4101: 'i' :참조되지 않은 지역 변수입니다.
   server.vcxproj -> C:\Users\dalm3\source\repos\server\Debug\server.exe

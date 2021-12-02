@@ -76,23 +76,27 @@ int main(int argc, char* argv[])
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
         return 1;
     Connection client;
+    memset(client.rname, 0, 32);
     Connection* ptr = &client;
     // socket()
     client.sock = socket(AF_INET, SOCK_STREAM, 0);
     if (client.sock == INVALID_SOCKET) err_quit("socket()");
- 
     printf("나이를 입력하세요: ");
     scanf("%d", &client.age);
     getchar();
-    printf("실제 이름을 입력하세요: ");
-    scanf("%s", client.rname);
-    getchar();
+    
     printf("문제가 생겼을 때 당신의 대처법은?\n");
     printf("말이 많아짐 or 생각이 많아짐(E/I로 대답)\n");
     printf("그냥 그런가 보다 or 어떻게 그럴 수가 있지(S/N)\n");
     printf("이해는 안되지만 공감 or 이해가 돼야 공감(F/T)\n: ");
     printf("한다면 함 or 뭐부터 하지(J/P)\n");
     scanf("%s", client.mbti);
+    getchar();
+    printf("실제 이름을 입력하세요: ");
+    scanf("%s", client.rname);
+    getchar();
+    printf("채팅에 쓸 닉네임을 설정하세요: ");
+    scanf("%s", client.nick);
     getchar();
     // connect()
     SOCKADDR_IN serveraddr;
@@ -102,10 +106,8 @@ int main(int argc, char* argv[])
     serveraddr.sin_port = htons(SERVERPORT);
     retval = connect(client.sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
     if (retval == SOCKET_ERROR) err_quit("connect()");
-    printf("채팅에 쓸 닉네임을 설정하세요: ");
-    scanf("%s", client.nick);
-    getchar();
-    send(client.sock, (char*)&client, sizeof(client), 0);//오류 안남
+    
+    send(client.sock,(char*)&client, sizeof(client), 0);//오류 안남
     // 데이터 통신에 사용할 변수
 
     int len;
