@@ -94,9 +94,11 @@ int main(int argc, char* argv[])
     getchar();
     printf("실제 이름을 입력하세요: ");
     scanf("%s", client.rname);
+    client.rname[strlen(client.rname)] = '\0';
     getchar();
     printf("채팅에 쓸 닉네임을 설정하세요: ");
     scanf("%s", client.nick);
+    client.nick[strlen(client.nick)] = '\0';
     getchar();
     // connect()
     SOCKADDR_IN serveraddr;
@@ -133,7 +135,7 @@ DWORD WINAPI SendMsg(LPVOID arg) {
     Connection* client = (Connection*)arg;
     char name_buf[BUFSIZE + 20];
     int retval = 0;
-    printf("자유롭게 채팅을 치면 됩니다.\n");
+    printf("자유롭게 채팅을 치면 됩니다.(종료시 exit | EXIT를 입력하세요.)\n opcode | OPCODE | Opcode 를 입력시 귓속말/프로필 열람/MBTI게임을 고르실 수 있습니다.\n");
     while (1) {
         
         fgets(buf, BUFSIZE, stdin);

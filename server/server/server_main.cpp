@@ -24,6 +24,7 @@ typedef struct s_connection {
 }Connection;
 DWORD WINAPI recvhandle(LPVOID arg);
 void send_func(char* msg, int len, int index);
+void opcode_func(Connection* arg);
 std::mutex hmutex;
 std::list<s_connection> client_list;
 std::list<s_connection>::iterator iter;
@@ -128,62 +129,33 @@ int main(int argc, char* argv[])
 
 DWORD WINAPI recvhandle(LPVOID arg) {
     Connection *client = (Connection*)arg;
-    int len, cycle, tmp;
+    int len, tmp, cmp=0, cycle=1;
     char msg[BUFSIZE];
     char whisper[BUFSIZE];
     //getpeername(client->sock, (SOCKADDR*)&clientaddr, &addrlen);
+    sprintf(msg, "\n%s 클라이언트가 접속하였습니다.\n", client->nick);
+    for (iter = client_list.begin(); iter != client_list.end(); iter++) {
+        if (iter->index == client->index) continue;
+        send(iter->sock, msg, sizeof(msg), 0);
+        if (cycle++ >= client_count) break;
+    }
     while ((len = recv(client->sock, msg, BUFSIZE, 0)) != 0)
     {
         msg[len] = '\0';
             if ((strcmp(msg,"opcode\0")==0) || (strcmp(msg,"Opcode\0")==0) || (strcmp(msg,"OPCODE\0")==0)) {
-                strcpy(msg, "어떤 기능을 이용 하시겠습니까?\n 1:귓속말 | 2: 프로필 보기 | 3: MBTI맞추기(미구현)");
-                send(client->sock,msg,sizeof(msg),0);
-                recv(client->sock, msg, BUFSIZE, 0);
-                tmp = atoi(msg);
-                switch (tmp) {
-                case 1:
-                    strcpy(msg, "누구에게 보내시겠습니까?");
-                    send(client->sock, msg, sizeof(msg), 0);
-                    recv(client->sock, msg, BUFSIZE, 0);
-                    tmp = atoi(msg);
-                    iter = client_list.begin();
-                    std::advance(iter, tmp);
-                    strcpy(msg, "보낼 내용을 입력해주세요");
-                    send(client->sock, msg, sizeof(msg), 0);
-                    memset(msg, 0, BUFSIZE);
-                    recv(client->sock, msg, BUFSIZE, 0);
-                    sprintf(whisper, "(귓속말)[%s]: %s", client->nick, msg);
-                    send(iter->sock, whisper, sizeof(whisper), 0);
-                    break;
-                case 2:
-                    strcpy(msg, "누구의 프로필을 보시겠습니까?");
-                    send(client->sock, msg, sizeof(msg), 0);
-                    recv(client->sock, msg, BUFSIZE, 0);
-                    tmp = atoi(msg);
-                    iter = client_list.begin();
-                    std::advance(iter, tmp);
-                    sprintf(msg, "나이:%d\n실명:%s\nMBTI:%s", iter->age, iter->rname, iter->mbti);
-                    send(client->sock, msg, sizeof(msg), 0);
-                    break;
-                /*case 3:
-                    strcpy(msg, "누구의 MBTI를 맞추시겠습니까?");
-                    send(client->sock, msg, sizeof(msg), 0);
-                    recv(client->sock, msg, BUFSIZE, 0);
-                    tmp = atoi(msg);
-                    iter = client_list.begin();
-                    std::advance(iter, tmp);
-                    */
-                default:
-                    break;
-                    
-                }
+                opcode_func(client);
                 continue;
             }
-        
         send_func(msg, sizeof(msg), client->index);
     }
+    cycle = 1;
+    sprintf(msg, "%s 클라이언트가 나갔습니다.\n", client->nick);
+    for (iter = client_list.begin(); iter != client_list.end(); iter++) {
+        if (iter->index == client->index) continue;
+        send(iter->sock, msg, sizeof(msg), 0);
+        if (cycle++ >= client_count) break;
+    }
     closesocket(client->sock);
-
     hmutex.lock();
     iter = client_list.begin();
     std::advance(iter, client->index);
@@ -214,8 +186,89 @@ void send_func(char* msg, int len, int index) {
     std::advance(iter, index);
     sprintf(tmp, "[%s]: %s", iter->nick, msg);
     for (iter = client_list.begin(); iter != client_list.end(); iter++) {
+        if (iter->index == index) continue;
         send(iter->sock, tmp, sizeof(tmp), 0);
         if (cycle++ >= client_count) break;
     }
     hmutex.unlock();
+}
+
+void opcode_func(Connection* arg) {
+    Connection* client = arg;
+    int tmp, cycle, len, cmp=0;
+    char op_msg[BUFSIZE];
+    char whisper[BUFSIZE];
+    strcpy(op_msg, "\n어떤 기능을 이용 하시겠습니까?\n 1:귓속말 | 2: 프로필 보기 | 3: MBTI맞추기(미구현)\n");
+    send(client->sock, op_msg, sizeof(op_msg), 0);
+    recv(client->sock, op_msg, BUFSIZE, 0);
+    tmp = atoi(op_msg);
+    switch (tmp) {
+    case 1:
+        cycle = 1;
+        strcpy(op_msg, "누구에게 보내시겠습니까?\n");
+        for (iter = client_list.begin(); iter != client_list.end(); iter++) {
+            sprintf(whisper, "%s\n", iter->nick);
+            strcat(op_msg, whisper);
+            if (cycle++ >= client_count) break;
+        }
+        send(client->sock, op_msg, sizeof(op_msg), 0);
+        len = recv(client->sock, op_msg, BUFSIZE, 0);
+        op_msg[len] = '\0';
+        cmp = 0;
+        cycle = 1;
+        for (iter = client_list.begin(); iter != client_list.end(); iter++) {
+            if (!strcmp(op_msg, iter->nick)) {
+                break;
+            }
+            else cmp++;
+            if (cycle++ >= client_count) break;
+        }
+        iter = client_list.begin();
+        std::advance(iter, cmp);
+        strcpy(op_msg, "보낼 내용을 입력해주세요\n");
+        send(client->sock, op_msg, sizeof(op_msg), 0);
+        memset(op_msg, 0, BUFSIZE);
+        recv(client->sock, op_msg, BUFSIZE, 0);
+        sprintf(whisper, "(귓속말)[%s]: %s\n", client->nick, op_msg);
+        send(iter->sock, whisper, sizeof(whisper), 0);
+        break;
+    case 2:
+        cycle = 1;
+        strcpy(op_msg, "누구의 프로필을 보시겠습니까?\n");
+        for (iter = client_list.begin(); iter != client_list.end(); iter++) {
+            sprintf(whisper, "%s\n", iter->nick);
+            strcat(op_msg, whisper);
+            if (cycle++ >= client_count) break;
+        }
+        send(client->sock, op_msg, sizeof(op_msg), 0);
+        len = recv(client->sock, op_msg, BUFSIZE, 0);
+        op_msg[len] = '\0';
+        cmp = 0;
+        cycle = 1;
+        for (iter = client_list.begin(); iter != client_list.end(); iter++) {
+            if (!strcmp(op_msg, iter->nick)) {
+                break;
+            }
+            else cmp++;
+            if (cycle++ >= client_count) break;
+        }
+        iter = client_list.begin();
+        std::advance(iter, cmp);
+        sprintf(whisper, "\n---------------%s가 당신의 프로필을 열람하였습니다---------------%\n", client->nick);
+        send(iter->sock, whisper, BUFSIZE, 0);
+        sprintf(op_msg, "나이:%d\n실명:%s\nMBTI:%s\n", iter->age, iter->rname, iter->mbti);
+        send(client->sock, op_msg, sizeof(op_msg), 0);
+        break;
+        /*case 3:
+            strcpy(msg, "누구의 MBTI를 맞추시겠습니까?");
+            send(client->sock, op_msg, sizeof(op_msg), 0);
+            recv(client->sock, op_msg, BUFSIZE, 0);
+            tmp = atoi(msgop_msg
+            iter = client_list.begin();
+            std::advance(iter, op_msg);
+            */
+    default:
+        break;
+
+    }
 }
