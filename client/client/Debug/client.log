@@ -1,4 +1,4 @@
 ﻿  client_main.cpp
-C:\Users\dalm3\source\repos\client\client\client_main.cpp(115,9): warning C4101: 'len' :참조되지 않은 지역 변수입니다.
-C:\Users\dalm3\source\repos\client\client\client_main.cpp(136,10): warning C4101: 'name_buf' :참조되지 않은 지역 변수입니다.
+C:\Users\dalm3\source\repos\client\client\client_main.cpp(116,9): warning C4101: 'len' :참조되지 않은 지역 변수입니다.
+C:\Users\dalm3\source\repos\client\client\client_main.cpp(137,10): warning C4101: 'name_buf' :참조되지 않은 지역 변수입니다.
   client.vcxproj -> C:\Users\dalm3\source\repos\client\Debug\client.exe

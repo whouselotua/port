@@ -14,6 +14,7 @@ typedef struct s_connection {
     SOCKET sock;
     int index;
     int age;
+    int score;
     char mbti[5];
     char rname[32];
     char nick[32];
@@ -84,7 +85,6 @@ int main(int argc, char* argv[])
     printf("나이를 입력하세요: ");
     scanf("%d", &client.age);
     getchar();
-    
     printf("문제가 생겼을 때 당신의 대처법은?\n");
     printf("말이 많아짐 or 생각이 많아짐(E/I로 대답)\n");
     printf("그냥 그런가 보다 or 어떻게 그럴 수가 있지(S/N)\n");
@@ -100,6 +100,7 @@ int main(int argc, char* argv[])
     scanf("%s", client.nick);
     client.nick[strlen(client.nick)] = '\0';
     getchar();
+    client.score = 0;
     // connect()
     SOCKADDR_IN serveraddr;
     ZeroMemory(&serveraddr, sizeof(serveraddr));
