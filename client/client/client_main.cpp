@@ -1,21 +1,21 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS // 최신 VC++ 컴파일 시 경고 방지
+#define _CRT_SECURE_NO_WARNINGS
 #pragma comment(lib, "ws2_32")
 #include <winsock2.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#define SERVERIP   "127.0.0.1"
+#define SERVERIP   "3.144.101.142"
 #define SERVERPORT 9000
 #define BUFSIZE    512
-char buf[BUFSIZE + 1];
 DWORD WINAPI SendMsg(LPVOID arg);
 DWORD WINAPI RecvMsg(LPVOID arg);
 typedef struct s_connection {
     SOCKET sock;
     int index;
-    int age;
     int score;
-    char mbti[5];
+    char age[32];
+    char mbti[32];
     char rname[32];
     char nick[32];
 }Connection;
@@ -49,24 +49,6 @@ void err_display(const char* msg)
 }
 
 // 사용자 정의 데이터 수신 함수
-int recvn(SOCKET s, char* buf, int len, int flags)
-{
-    int received;
-    char* ptr = buf;
-    int left = len;
-
-    while (left > 0) {
-        received = recv(s, ptr, left, flags);
-        if (received == SOCKET_ERROR)
-            return SOCKET_ERROR;
-        else if (received == 0)
-            break;
-        left -= received;
-        ptr += received;
-    }
-
-    return (len - left);
-}
 
 int main(int argc, char* argv[])
 {
@@ -83,14 +65,17 @@ int main(int argc, char* argv[])
     client.sock = socket(AF_INET, SOCK_STREAM, 0);
     if (client.sock == INVALID_SOCKET) err_quit("socket()");
     printf("나이를 입력하세요: ");
-    scanf("%d", &client.age);
+    scanf("%s", client.age);
+    client.age[strlen(client.age)] = '\0';
     getchar();
     printf("문제가 생겼을 때 당신의 대처법은?\n");
     printf("말이 많아짐 or 생각이 많아짐(E/I로 대답)\n");
     printf("그냥 그런가 보다 or 어떻게 그럴 수가 있지(S/N)\n");
-    printf("이해는 안되지만 공감 or 이해가 돼야 공감(F/T)\n: ");
+    printf("이해는 안되지만 공감 or 이해가 돼야 공감(F/T)\n");  
     printf("한다면 함 or 뭐부터 하지(J/P)\n");
+    printf("ex)ISFJ\n");
     scanf("%s", client.mbti);
+    client.mbti[strlen(client.mbti)] = '\0';
     getchar();
     printf("실제 이름을 입력하세요: ");
     scanf("%s", client.rname);
@@ -134,19 +119,25 @@ int main(int argc, char* argv[])
 
 DWORD WINAPI SendMsg(LPVOID arg) {
     Connection* client = (Connection*)arg;
-    char name_buf[BUFSIZE + 20];
     int retval = 0;
+    int len;
+    char send_buf[BUFSIZE + 1];
     printf("자유롭게 채팅을 치면 됩니다.(종료시 exit | EXIT를 입력하세요.)\n opcode | OPCODE | Opcode 를 입력시 귓속말/프로필 열람/MBTI게임을 고르실 수 있습니다.\n");
     while (1) {
         
-        fgets(buf, BUFSIZE, stdin);
-        if (!strcmp(buf, "exit\n") || !strcmp(buf, "EXIT\n"))
+        fgets(send_buf, BUFSIZE+1, stdin);
+        if (!strcmp(send_buf, "exit\n") || !strcmp(send_buf, "EXIT\n"))
         {
             shutdown(client->sock, SD_SEND);
-            exit(0);
+            break;
         }
-        buf[strlen(buf) - 1] = '\0';
-        retval=send(client->sock, buf, strlen(buf), 0);
+        len = strlen(send_buf);
+        if (send_buf[len - 1] == '\n')
+            send_buf[len - 1] = '\0';
+        if (strlen(send_buf) == 0) {
+            continue;
+        }
+        retval=send(client->sock, send_buf, strlen(send_buf), 0);
         if (retval == SOCKET_ERROR) {
             err_display("send()");
             break;
@@ -159,13 +150,20 @@ DWORD WINAPI RecvMsg(LPVOID arg)
 {
     Connection *client = (Connection*)arg;
     int len;
+    char tmp[BUFSIZE + 1];
+    char recv_buf[BUFSIZE + 1];
 
-    while ((len = recv(client->sock, buf, sizeof(buf), 0)) != 0)
+    while ((len = recv(client->sock, recv_buf, BUFSIZE, 0)) != 0)
     {
+        if (len == SOCKET_ERROR) {
+            err_display("recv()");
+            break;
+        }
         if (len == -1)
             return -1;
-        buf[len] = 0;
-        fputs(buf, stdout);
+        recv_buf[len] = '\0';
+        printf("\n");
+        fputs(recv_buf, stdout);
         printf("\n");
     }
     return 0;

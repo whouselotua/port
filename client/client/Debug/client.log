@@ -1,4 +1,7 @@
 ﻿  client_main.cpp
-C:\Users\dalm3\source\repos\client\client\client_main.cpp(116,9): warning C4101: 'len' :참조되지 않은 지역 변수입니다.
-C:\Users\dalm3\source\repos\client\client\client_main.cpp(137,10): warning C4101: 'name_buf' :참조되지 않은 지역 변수입니다.
+C:\Users\dalm3\source\repos\client\client\client_main.cpp(2,1): warning C4005: '_CRT_SECURE_NO_WARNINGS': 매크로 재정의
+C:\Users\dalm3\source\repos\client\client\client_main.cpp : message : '_CRT_SECURE_NO_WARNINGS'의 이전 정의를 참조하십시오.
+C:\Users\dalm3\source\repos\client\client\client_main.cpp(101,9): warning C4101: 'len' :참조되지 않은 지역 변수입니다.
+C:\Users\dalm3\source\repos\client\client\client_main.cpp(153,10): warning C4101: 'tmp' :참조되지 않은 지역 변수입니다.
+  LINK : C:\Users\dalm3\source\repos\client\Debug\client.exe을(를) 찾을 수 없거나 마지막 증분 링크에 의해 빌드되지 않았습니다. 전체 링크를 수행하고 있습니다.
   client.vcxproj -> C:\Users\dalm3\source\repos\client\Debug\client.exe

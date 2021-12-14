@@ -1,6 +1,6 @@
 ﻿  server_main_proto.cpp
-C:\Users\dalm3\source\repos\server\server\server_main_proto.cpp(134,14): warning C4101: 'tmp' :참조되지 않은 지역 변수입니다.
-C:\Users\dalm3\source\repos\server\server\server_main_proto.cpp(136,10): warning C4101: 'whisper' :참조되지 않은 지역 변수입니다.
-C:\Users\dalm3\source\repos\server\server\server_main_proto.cpp(194,9): warning C4101: 'i' :참조되지 않은 지역 변수입니다.
-C:\Users\dalm3\source\repos\server\server\server_main_proto.cpp(282,26): warning C4778: 'sprintf' : 서식 문자열 '%\n'이(가) 종결되지 않았습니다.
+C:\Users\dalm3\source\repos\server\server\server_main_proto.cpp(135,14): warning C4101: 'tmp' :참조되지 않은 지역 변수입니다.
+C:\Users\dalm3\source\repos\server\server\server_main_proto.cpp(137,10): warning C4101: 'whisper' :참조되지 않은 지역 변수입니다.
+C:\Users\dalm3\source\repos\server\server\server_main_proto.cpp(203,9): warning C4101: 'i' :참조되지 않은 지역 변수입니다.
+C:\Users\dalm3\source\repos\server\server\server_main_proto.cpp(301,26): warning C4778: 'sprintf' : 서식 문자열 '%\n'이(가) 종결되지 않았습니다.
   server.vcxproj -> C:\Users\dalm3\source\repos\server\Debug\server.exe
